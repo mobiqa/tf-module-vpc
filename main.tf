@@ -1,10 +1,10 @@
 resource "aws_vpc" "main" {
   cidr_block = var.cidr_block
-  tags = local.common_tags
-#  tags = merge(
-#    local.common_tags,
-#    { Name = "${var.env}-vpc" }
-#  )
+#  tags = local.common_tags
+  tags = merge(
+    local.common_tags,
+    { Name = "${var.env}-vpc" }
+  )
 }
 
 #resource "aws_subnet" "main" {
