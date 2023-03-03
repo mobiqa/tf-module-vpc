@@ -35,16 +35,18 @@ resource "aws_route" "default" {
   vpc_peering_connection_id = aws_vpc_peering_connection.peer.id
 }
 
+
+resource "aws_route" "igw-route" {
+  route_table_id            = aws_vpc.default_route_table_id
+  destination_cidr_block    = "0.0.0.0/0"
+  vpc_peering_connection_id = aws_vpc_peering_connection.peer.id
+}
+
+
 resource "aws_route" "default-vpc" {
   route_table_id            = data.aws_vpc.default.main_route_table_id
   destination_cidr_block    = var.cidr_block
   vpc_peering_connection_id = aws_vpc_peering_connection.peer.id
-}
-
-resource "aws_route" "igw-route" {
-  route_table_id            = data.aws_vpc.default.main_route_table_id
-  destination_cidr_block    = "0.0.0.0/0"
-  gateway_id = aws_internet_gateway.igw.id
 }
 
 
@@ -53,7 +55,7 @@ resource "aws_internet_gateway" "igw" {
 
   tags = merge(
     local.common_tags,
-    { Name = "${var.env}-peering" }
+    { Name = "${var.env}-igw" }
   )
 
 }
