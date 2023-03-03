@@ -41,6 +41,13 @@ resource "aws_route" "default-vpc" {
   vpc_peering_connection_id = aws_vpc_peering_connection.peer.id
 }
 
+resource "aws_route" "igw-route" {
+  route_table_id            = data.aws_vpc.default.main_route_table_id
+  destination_cidr_block    = var.cidr_block
+  gateway_id = aws_internet_gateway.igw.id
+}
+
+
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
 
