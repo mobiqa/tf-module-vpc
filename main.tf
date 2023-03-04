@@ -91,7 +91,7 @@ resource "aws_route_table" "public" {
   )
 }
 
-resource "aws_route_table_association" "a" {
+resource "aws_route_table_association" "public-rt-assoc" {
   count      = length(var.public_subnets_cidr)
   subnet_id      = aws_subnet.public.*.id[count.index]
   route_table_id = aws_route_table.public.id
@@ -115,6 +115,34 @@ resource "aws_nat_gateway" "ngw" {
   # on the Internet Gateway for the VPC.
   // depends_on = [aws_internet_gateway.example]
 }
+
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = data.aws_vpc.default.cidr_block
+    vpc_peering_connection_id = aws_vpc_peering_connection.peer.id
+  }
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.ngw.id
+  }
+
+
+  tags = merge(
+    local.common_tags,
+    { Name = "${var.env}-private-route-table" }
+  )
+}
+
+resource "aws_route_table_association" "private-rt-assoc" {
+  count      = length(aws_subnet.private)
+  subnet_id      = aws_subnet.public.*.id[count.index]
+  route_table_id = aws_route_table.public.id
+}
+
+
 
 #// create Ec2
 #
