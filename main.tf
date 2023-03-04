@@ -91,6 +91,12 @@ resource "aws_route_table" "public" {
   )
 }
 
+resource "aws_route_table_association" "a" {
+  count      = length(var.public_subnets_cidr)
+  subnet_id      = aws_subnet.public.*.id[count.index]
+  route_table_id = aws_route_table.public.id
+}
+
 #// create Ec2
 #
 #data "aws_ami" "centos8" {
