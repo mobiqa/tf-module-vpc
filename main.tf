@@ -91,7 +91,7 @@ resource "aws_route_table" "public" {
   )
 }
 
-resource "aws_route_table_association" "a" {
+resource "aws_route_table_association" "public-rt-assoc" {
   count      = length(var.public_subnets_cidr)
   subnet_id      = aws_subnet.public.*.id[count.index]
   route_table_id = aws_route_table.public.id
