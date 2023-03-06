@@ -1,6 +1,5 @@
 resource "aws_vpc" "main" {
   cidr_block = var.cidr_block
-
   tags = merge(
     local.common_tags,
     { Name = "${var.env}-vpc" }
@@ -18,47 +17,32 @@ resource "aws_vpc_peering_connection" "peer" {
   )
 }
 
+resource "aws_route" "r" {
+  route_table_id            = data.aws_vpc.default.main_route_table_id
+  destination_cidr_block    = var.cidr_block
+  vpc_peering_connection_id = aws_vpc_peering_connection.peer.id
+}
 
-
-resource "aws_internet_gateway" "igw" {
+resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.main.id
 
   tags = merge(
     local.common_tags,
     { Name = "${var.env}-igw" }
   )
-
 }
 
-
 resource "aws_eip" "ngw-eip" {
-  vpc      = true
+  vpc = true
 }
 
 resource "aws_nat_gateway" "ngw" {
   allocation_id = aws_eip.ngw-eip.id
-  subnet_id     = var.public_subnet_ids[0]
-
+  subnet_id     = lookup(lookup(module.public_subnets, "public", null), "subnet_ids", null)[0]
 
   tags = merge(
     local.common_tags,
     { Name = "${var.env}-ngw" }
   )
 
-  # To ensure proper ordering, it is recommended to add an explicit dependency
-  # on the Internet Gateway for the VPC.
-  // depends_on = [aws_internet_gateway.example]
 }
-
-
-resource "aws_route" "r" {
-  route_table_id            = data.aws_vpc.default.main_route_table_id
-  destination_cidr_block    = var.cidr_block
-  vpc_peering_connection_id = aws_vpc_peering_connection.peer.id
-
-}
-
-
-
-// create Ec2
-
